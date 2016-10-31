@@ -12,6 +12,7 @@ whitespace      [ \t\n]
 integer         [0-9]+
 float           [0-9]+\.[0-9]+
 string          [a-zA-Z0-9]+
+op              "="|"<="|">="|"<"|">"|"!="
 
 %%
 
@@ -34,6 +35,13 @@ string          [a-zA-Z0-9]+
                     // we have to copy because we can't rely on yytext not changing underneath us:
                     yylval.sval = strdup(yytext);
                     return STRING;
+                }
+
+{op}            {
+                    cout << "Flex found a operator: " << yytext << endl;
+                    // we have to copy because we can't rely on yytext not changing underneath us:
+                    yylval.opval = strdup(yytext);
+                    return OP;
                 }
 
 .               ;

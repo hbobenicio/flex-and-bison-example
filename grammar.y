@@ -20,7 +20,7 @@ void yyerror(const char *s);
 	int ival;
 	float fval;
 	char *sval;
-	char *op;
+	char *opval;
 }
 
 // define the "terminal symbol" token types I'm going to use (in CAPS
@@ -35,17 +35,19 @@ void yyerror(const char *s);
 // something silly to echo to the screen what bison gets from flex.  We'll
 // make a real one shortly:
 snazzle:
-	INT snazzle      { cout << "bison found an int: " << $1 << endl; }
-	| FLOAT snazzle  { cout << "bison found a float: " << $1 << endl; }
-	| STRING snazzle { cout << "bison found a string: " << $1 << endl; }
-	| INT            { cout << "bison found an int: " << $1 << endl; }
-	| FLOAT          { cout << "bison found a float: " << $1 << endl; }
-	| STRING         { cout << "bison found a string: " << $1 << endl; }
+	snazzle INT      { cout << "Bison found an int: " << $2 << endl; }
+	| snazzle FLOAT  { cout << "Bison found a float: " << $2 << endl; }
+	| snazzle STRING { cout << "Bison found a string: " << $2 << endl; }
+	| snazzle OP     { cout << "Bison found a operator: " << $2 << endl; }
+	| INT            { cout << "Bison found an int: " << $1 << endl; }
+	| FLOAT          { cout << "Bison found a float: " << $1 << endl; }
+	| STRING         { cout << "Bison found a string: " << $1 << endl; }
+	| OP             { cout << "Bison found a operator: " << $1 << endl; }
 	;
 %%
 
 void yyerror(const char *s) {
-	cout << "EEK, parse error!  Message: " << s << endl;
+	cout << "Parse error!  Message: " << s << endl;
 	// might as well halt now:
 	exit(-1);
 }
