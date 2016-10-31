@@ -21,6 +21,7 @@ void yyerror(const char *s);
 	float fval;
 	char *sval;
 	char *opval;
+	char *scval;
 }
 
 // define the "terminal symbol" token types I'm going to use (in CAPS
@@ -29,21 +30,27 @@ void yyerror(const char *s);
 %token <fval> FLOAT
 %token <sval> STRING
 %token <opval> OP
+%token <scval> SEMICOLON
 
 %%
 // this is the actual grammar that bison will parse, but for right now it's just
 // something silly to echo to the screen what bison gets from flex.  We'll
 // make a real one shortly:
-snazzle:
-	snazzle INT      { cout << "Bison found an int: " << $2 << endl; }
-	| snazzle FLOAT  { cout << "Bison found a float: " << $2 << endl; }
-	| snazzle STRING { cout << "Bison found a string: " << $2 << endl; }
-	| snazzle OP     { cout << "Bison found a operator: " << $2 << endl; }
-	| INT            { cout << "Bison found an int: " << $1 << endl; }
-	| FLOAT          { cout << "Bison found a float: " << $1 << endl; }
-	| STRING         { cout << "Bison found a string: " << $1 << endl; }
-	| OP             { cout << "Bison found a operator: " << $1 << endl; }
-	;
+file_grammar :  /* empty */
+             | file_grammar exp
+             ;
+
+exp          : STRING OP value SEMICOLON {
+                   cout << "Bison found filter expression: "
+                        << $1 << " " << $2 << " $exp" << endl;
+               }
+             ;
+
+value        : INT                        { cout << "Bison found a int: " << $1 << endl; }
+             | FLOAT                      { cout << "Bison found a float: " << $1 << endl; }
+             | STRING                     { cout << "Bison found a string: " << $1 << endl; }
+             ;
+
 %%
 
 void yyerror(const char *s) {
