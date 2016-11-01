@@ -7,6 +7,8 @@ using namespace std;
 extern "C" int yylex();
 extern "C" int yyparse();
 extern "C" FILE *yyin;
+
+extern int line_number;
  
 void yyerror(const char *s);
 %}
@@ -20,19 +22,22 @@ void yyerror(const char *s);
 	int ival;
 	float fval;
 	char *sval;
-	char *opval;
-	char *scval;
 }
+
+// define the constant-string tokens:
+%token SEMICOLON
+%token ENDL
 
 // define the "terminal symbol" token types I'm going to use (in CAPS
 // by convention), and associate each with a field of the union:
 %token <ival> INT
 %token <fval> FLOAT
-%token <sval> STRING
-%token <opval> OP
-%token <scval> SEMICOLON
+%token <sval> ID
+%token <sval> OP
+%token <sval> STRING_LITERAL
 
 %%
+
 // this is the actual grammar that bison will parse, but for right now it's just
 // something silly to echo to the screen what bison gets from flex.  We'll
 // make a real one shortly:
@@ -40,7 +45,7 @@ file_grammar :  /* empty */
              | file_grammar exp
              ;
 
-exp          : STRING OP value SEMICOLON {
+exp          : ID OP value SEMICOLON endls {
                    cout << "Bison found filter expression: "
                         << $1 << " " << $2 << " $exp" << endl;
                }
@@ -48,13 +53,17 @@ exp          : STRING OP value SEMICOLON {
 
 value        : INT                        { cout << "Bison found a int: " << $1 << endl; }
              | FLOAT                      { cout << "Bison found a float: " << $1 << endl; }
-             | STRING                     { cout << "Bison found a string: " << $1 << endl; }
+             | STRING_LITERAL             { cout << "Bison found a string literal: " << $1 << endl; }
+             ;
+
+endls        : endls ENDL
+             | ENDL
              ;
 
 %%
 
 void yyerror(const char *s) {
-	cout << "Parse error!  Message: " << s << endl;
+	cout << "Parse error on line " << line_number << "!  Message: " << s << endl;
 	// might as well halt now:
 	exit(-1);
 }

@@ -4,20 +4,28 @@
     #define YY_DECL extern "C" int yylex()
 
     #include "grammar.h"
+
+    int line_number = 1;
 %}
 
+/* We're parsing only one file at a time.*/
+/* There is no need for a custom yywrap function*/
 %option noyywrap
 
-whitespace      [ \t\n]
-integer         [0-9]+
-float           [0-9]+\.[0-9]+
-string          [a-zA-Z0-9-]+
+whitespace      [ \t]
+endl            \n
+integer         -?[0-9]+
+float           -?[0-9]+\.[0-9]+
+string          [a-zA-Z0-9]+
+id              {string}(-{string})*
+string_literal  \"{string}\"|\'{string}\'
 op              "="|"<="|">="|"<"|">"|"!="
 semicolon       ";"
 
 %%
 
 {whitespace}    ;
+{endl}          { line_number++; return ENDL; }
 
 {float}         {
                     cout << "Flex found a float: " << yytext << endl;
@@ -31,24 +39,28 @@ semicolon       ";"
                     return INT;
                 }
 
-{string}        {
-                    cout << "Flex found a string: " << yytext << endl;
+{id}            {
+                    cout << "Flex found a id: " << yytext << endl;
                     // we have to copy because we can't rely on yytext not changing underneath us:
                     yylval.sval = strdup(yytext);
-                    return STRING;
+                    return ID;
                 }
+
+{string_literal} {
+                    cout << "Flex found a string literal: " << yytext << endl;
+                    yylval.sval = strdup(yytext);
+                    return STRING_LITERAL;
+                 }
 
 {op}            {
                     cout << "Flex found a operator: " << yytext << endl;
                     // we have to copy because we can't rely on yytext not changing underneath us:
-                    yylval.opval = strdup(yytext);
+                    yylval.sval = strdup(yytext);
                     return OP;
                 }
 
 {semicolon}     {
                     cout << "Flex found a semicolon" << endl;
-                    // we have to copy because we can't rely on yytext not changing underneath us:
-                    yylval.scval = strdup(yytext);
                     return SEMICOLON;
                 }
 
