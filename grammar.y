@@ -36,6 +36,10 @@ void yyerror(const char *s);
 %token <sval> OP
 %token <sval> STRING_LITERAL
 
+//%type<foo> value
+
+%start file_grammar
+
 %%
 
 // this is the actual grammar that bison will parse, but for right now it's just
@@ -47,13 +51,13 @@ file_grammar :  /* empty */
 
 exp          : ID OP value SEMICOLON endls {
                    cout << "Bison found filter expression: "
-                        << $1 << " " << $2 << " $exp" << endl;
+                        << $1 << " " << $2 << " $exp" << '\n';
                }
              ;
 
-value        : INT                        { cout << "Bison found a int: " << $1 << endl; }
-             | FLOAT                      { cout << "Bison found a float: " << $1 << endl; }
-             | STRING_LITERAL             { cout << "Bison found a string literal: " << $1 << endl; }
+value        : INT                        { cout << "Bison found a int: " << $1 << '\n'; /*$$ = $1;*/ }
+             | FLOAT                      { cout << "Bison found a float: " << $1 << '\n'; }
+             | STRING_LITERAL             { cout << "Bison found a string literal: " << $1 << '\n'; }
              ;
 
 endls        : endls ENDL
@@ -63,7 +67,7 @@ endls        : endls ENDL
 %%
 
 void yyerror(const char *s) {
-	cout << "Parse error on line " << line_number << "!  Message: " << s << endl;
+	cout << "Parse error on line " << line_number << "!  Message: " << s << '\n';
 	// might as well halt now:
 	exit(-1);
 }
